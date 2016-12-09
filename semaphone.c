@@ -8,47 +8,42 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-int mainH(int argc, char* argv[]){
-  int sem;
+int main(int argc, char* argv[]){
+  int semid;
   int sc;
   int sem_id = 1;
-  key_t key;
+  key_t key = ftok("makefile", 18);
 
-  key = ftok("makefile", 1);
-  sem = semget(key, 1, IPC_CREAT);
-
-  struct sembuf semopinc = {
-    .sem_num = 0,
-    .sem_op = 1,
-    .sem_flg = 0
+  union semun {
+    int val;
+    struct semid_ds *buf;
+    unsigned short int *array;
   };
-
-  struct sembuf semopdec = {
-    .sem_num = 0,
-    .sem_op = -1,
-    .sem_flg = 1
-  };
-
-  //union semun su = (union semun) malloc(sizeof(union semun));
 
   if (strncmp(argv[1], "-c", strlen(argv[1])) ==0){
     int fd = open("story.txt", O_TRUNC | O_APPEND | O_WRONLY);
-    semop(sem, &semopdec, 1);
+    semid = semget(key, 1, IPC_CREAT | 0644);
+    printf("Semaphore created: %d\n", semid);
+    union semun su;
+    su.val = 1;
+    sc = semctl(semid, 0, SETVAL, su);
+    printf("Value set: %d\n", sc);
     //write(fd, argv[1], sizeof(argv[1]))
-    //sc = semctl(sem, 18, SETVAL, su);
     close(fd);
   }
 
   else if (strncmp(argv[1], "-r", strlen(argv[1])) ==0){
-    semop(sem, &semopinc, 1);
-    //sc = semctl(sem, 1, IPC_RMID);
+    semid = semget(key, 1, 0);
+    //removing semaphore
+    sc = semctl(semid, 0, IPC_RMID);
+    printf("Semaphore removed: %d\n", sc);
     int fd = open("story.txt", O_RDONLY);
     int c;
     FILE *file;
     file = fopen("story.txt", "r");
     if (file){
       while ((c = getc(file)) != EOF)
-	putchar(c);
+	printf("%c",c);
       fclose(file);
     }
   }
