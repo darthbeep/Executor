@@ -25,7 +25,6 @@ int main(){
   printf("Memory: %d\n", sd);
 
   if (*len){
-    printf("HERE\n");
     int fd = open("story.txt", O_RDONLY);
     if (!fd) {
       printf("File does not exist.\n");
