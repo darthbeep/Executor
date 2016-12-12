@@ -16,7 +16,7 @@ int main(){
   printf("Waiting for other users to finish...\n");
 
   printf("Semaphore: %d\n", semid);
-  semop(semid, &buf, 1);
+  //semop(semid, &buf, 1);
 
   //setting the shared memory
   int sd = shmget(ftok("makefile", 3), sizeof(int), IPC_CREAT | 0644);
